@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="crmGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#1d4ed8" />
+    </linearGradient>
+  </defs>
+  <rect width="100" height="100" rx="20" fill="url(#crmGrad)" />
+  <path d="M50 20 L76 35 L76 65 L50 80 L24 65 L24 35 Z" stroke="#ffffff" stroke-width="5" fill="none" />
+  <path d="M50 34 L64 42 L64 58 L50 66 L36 58 L36 42 Z" fill="#ffffff" />
+</svg>

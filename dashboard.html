@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CRM Dashboard - Sales, Customers and Leads Analytics">
+  <title>Dashboard - CRM</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/icons/logo.svg">
+  
+  <!-- Font Awesome CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="src/css/style.css">
+</head>
+<body>
+
+  <div class="app-layout">
+    <!-- Sidebar Backdrop for Mobile -->
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <!-- Left Sidebar -->
+    <aside class="app-sidebar">
+      <div class="sidebar-brand">
+        <a href="dashboard.html" class="brand-link">
+          <div class="brand-logo-icon">
+            <i class="fa-solid fa-bolt"></i>
+          </div>
+          <span class="brand-text">CRM</span>
+        </a>
+        <button type="button" class="sidebar-close-btn" id="sidebar-close-btn" aria-label="Close sidebar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Main Navigation</div>
+        <a href="dashboard.html" class="nav-item">
+          <i class="fa-solid fa-chart-pie"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="customers.html" class="nav-item">
+          <i class="fa-solid fa-users"></i>
+          <span>Customers</span>
+        </a>
+        <a href="leads.html" class="nav-item">
+          <i class="fa-solid fa-bullseye"></i>
+          <span>Leads</span>
+        </a>
+        <a href="sales.html" class="nav-item">
+          <i class="fa-solid fa-chart-line"></i>
+          <span>Sales</span>
+        </a>
+        <a href="tasks.html" class="nav-item">
+          <i class="fa-solid fa-list-check"></i>
+          <span>Tasks</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="logout-nav-item logout-trigger" role="button" tabindex="0">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          <span>Sign Out</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="app-main">
+      <!-- Top Header -->
+      <header class="app-header">
+        <div class="header-left">
+          <button type="button" class="hamburger-btn" id="hamburger-btn" aria-label="Open navigation menu">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <div class="header-page-title">
+            <h1>Dashboard</h1>
+            <p>Overview of your CRM activities</p>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <div class="header-search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Search CRM data..." id="global-search-input">
+          </div>
+
+          <!-- Notifications Dropdown -->
+          <div class="notification-container">
+            <button type="button" class="header-icon-btn" id="notification-btn" aria-label="Notifications">
+              <i class="fa-regular fa-bell"></i>
+              <span class="badge-dot"></span>
+            </button>
+            <div class="dropdown-panel" id="notification-dropdown">
+              <div class="dropdown-header">
+                <h4>Notifications</h4>
+                <span class="badge badge-status badge-info" style="font-size: 11px;">3 Unread</span>
+              </div>
+              <div class="dropdown-list">
+                <div class="dropdown-item-notification">
+                  <div class="icon"><i class="fa-solid fa-handshake"></i></div>
+                  <div class="content">
+                    <div class="title">Deal closed with TechNova (₹2,50,000)</div>
+                    <div class="time">15 mins ago</div>
+                  </div>
+                </div>
+                <div class="dropdown-item-notification">
+                  <div class="icon"><i class="fa-solid fa-user-plus"></i></div>
+                  <div class="content">
+                    <div class="title">New lead received from website: Arjun Mehta</div>
+                    <div class="time">1 hour ago</div>
+                  </div>
+                </div>
+                <div class="dropdown-item-notification">
+                  <div class="icon"><i class="fa-solid fa-clock"></i></div>
+                  <div class="content">
+                    <div class="title">Follow-up task scheduled for 2:30 PM</div>
+                    <div class="time">3 hours ago</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- User Profile -->
+          <div class="user-profile-btn">
+            <div class="user-avatar">AD</div>
+            <div class="user-meta">
+              <div class="name">Admin</div>
+              <div class="role">Administrator</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Body -->
+      <main class="content-body">
+        <!-- 4 Key Statistic Cards -->
+        <section class="stats-grid" aria-label="Key CRM Metrics">
+          <!-- Total Customers -->
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <div class="stat-icon primary">
+                <i class="fa-solid fa-users"></i>
+              </div>
+              <span class="stat-trend up">
+                <i class="fa-solid fa-arrow-up"></i> +12%
+              </span>
+            </div>
+            <div class="stat-value" id="stat-customers-val">0</div>
+            <div class="stat-label">Total Customers</div>
+          </div>
+
+          <!-- Total Leads -->
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <div class="stat-icon purple">
+                <i class="fa-solid fa-bullseye"></i>
+              </div>
+              <span class="stat-trend up">
+                <i class="fa-solid fa-arrow-up"></i> +8.4%
+              </span>
+            </div>
+            <div class="stat-value" id="stat-leads-val">0</div>
+            <div class="stat-label">Total Leads</div>
+          </div>
+
+          <!-- Total Sales -->
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <div class="stat-icon success">
+                <i class="fa-solid fa-indian-rupee-sign"></i>
+              </div>
+              <span class="stat-trend up">
+                <i class="fa-solid fa-arrow-up"></i> +24.5%
+              </span>
+            </div>
+            <div class="stat-value" id="stat-sales-val">₹0</div>
+            <div class="stat-label">Total Sales (Won)</div>
+          </div>
+
+          <!-- Pending Tasks -->
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <div class="stat-icon warning">
+                <i class="fa-solid fa-list-check"></i>
+              </div>
+              <span class="stat-trend neutral">
+                <i class="fa-solid fa-circle"></i> Active
+              </span>
+            </div>
+            <div class="stat-value" id="stat-tasks-val">0</div>
+            <div class="stat-label">Pending Tasks</div>
+          </div>
+        </section>
+
+        <!-- Quick Actions Banner -->
+        <section class="quick-actions-card">
+          <div class="quick-actions-info">
+            <h3>Quick Actions</h3>
+            <p>Accelerate your workflow by creating records directly from the overview</p>
+          </div>
+          <div class="quick-action-buttons">
+            <button type="button" class="btn-glass" id="qa-add-customer-btn">
+              <i class="fa-solid fa-user-plus"></i> Add Customer
+            </button>
+            <button type="button" class="btn-glass" id="qa-add-lead-btn">
+              <i class="fa-solid fa-bullseye"></i> Add Lead
+            </button>
+            <button type="button" class="btn-glass" id="qa-add-task-btn">
+              <i class="fa-solid fa-calendar-plus"></i> Add Task
+            </button>
+          </div>
+        </section>
+
+        <!-- Dashboard Analytics & Activity Grid -->
+        <div class="dashboard-grid">
+          <!-- Sales Overview Bar Chart -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h2 class="card-title">Sales Overview</h2>
+                <p class="card-subtitle">Monthly closed deals revenue comparison (Jan - Jun)</p>
+              </div>
+              <div class="chart-legend">
+                <div class="legend-item">
+                  <span class="legend-color sales"></span>
+                  <span>Won Revenue</span>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="chart-container">
+                <div class="chart-header-metrics">
+                  <div>
+                    <span style="font-size: 13px; color: var(--text-muted);">Current H1 Revenue</span>
+                    <div class="chart-summary-number">₹8,45,000</div>
+                  </div>
+                  <span class="badge-status badge-success">On Target (+18%)</span>
+                </div>
+
+                <!-- Custom Bar Chart Container -->
+                <div class="bar-chart-wrapper" id="sales-bar-chart">
+                  <!-- Generated dynamically via Vanilla JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Activities Feed -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h2 class="card-title">Recent Activities</h2>
+                <p class="card-subtitle">Latest operations and updates</p>
+              </div>
+              <a href="customers.html" style="font-size: 12px; font-weight: 600;">View All</a>
+            </div>
+            <div class="card-body">
+              <div class="activities-list" id="activities-feed">
+                <!-- Dynamically rendered via JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Quick Action: Add Customer Modal -->
+  <div class="modal-overlay" id="quick-customer-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">Add New Customer</h3>
+        <button type="button" class="modal-close-btn" id="close-quick-customer-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="quick-customer-form">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="qc-name">Customer Name *</label>
+            <input type="text" id="qc-name" class="form-input" placeholder="e.g. Rahul Sharma" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="qc-email">Email Address *</label>
+              <input type="email" id="qc-email" class="form-input" placeholder="rahul@example.com" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="qc-phone">Phone Number</label>
+              <input type="tel" id="qc-phone" class="form-input" placeholder="9876543210">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="qc-company">Company Name *</label>
+              <input type="text" id="qc-company" class="form-input" placeholder="TechNova" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="qc-status">Status</label>
+              <select id="qc-status" class="form-input custom-select">
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+                <option value="Pending">Pending</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" id="cancel-quick-customer-modal">Cancel</button>
+          <button type="submit" class="btn-primary">Add Customer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Quick Action: Add Lead Modal -->
+  <div class="modal-overlay" id="quick-lead-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">Add New Lead</h3>
+        <button type="button" class="modal-close-btn" id="close-quick-lead-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="quick-lead-form">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="ql-name">Lead Name *</label>
+            <input type="text" id="ql-name" class="form-input" placeholder="e.g. Arjun Mehta" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="ql-company">Company *</label>
+              <input type="text" id="ql-company" class="form-input" placeholder="FinTech Pro" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="ql-contact">Contact Phone *</label>
+              <input type="tel" id="ql-contact" class="form-input" placeholder="9876500001" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="ql-status">Status</label>
+              <select id="ql-status" class="form-input custom-select">
+                <option value="New">New</option>
+                <option value="Contacted">Contacted</option>
+                <option value="Converted">Converted</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="ql-date">Follow-up Date</label>
+              <input type="date" id="ql-date" class="form-input">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" id="cancel-quick-lead-modal">Cancel</button>
+          <button type="submit" class="btn-primary">Add Lead</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Quick Action: Add Task Modal -->
+  <div class="modal-overlay" id="quick-task-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">Create New Task</h3>
+        <button type="button" class="modal-close-btn" id="close-quick-task-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="quick-task-form">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="qt-task">Task Description *</label>
+            <input type="text" id="qt-task" class="form-input" placeholder="e.g. Follow up with Rahul Sharma" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="qt-date">Due Date *</label>
+              <input type="date" id="qt-date" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="qt-priority">Priority</label>
+              <select id="qt-priority" class="form-input custom-select">
+                <option value="High">High</option>
+                <option value="Medium" selected>Medium</option>
+                <option value="Low">Low</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="qt-status">Status</label>
+            <select id="qt-status" class="form-input custom-select">
+              <option value="Pending" selected>Pending</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" id="cancel-quick-task-modal">Cancel</button>
+          <button type="submit" class="btn-primary">Create Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Shared App & Dashboard JS -->
+  <script src="src/js/app.js"></script>
+  <script src="src/js/dashboard.js"></script>
+</body>
+</html>
