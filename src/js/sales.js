@@ -31,6 +31,17 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initial Render
   renderSales();
 
+  // Validation Schema
+  const dealSchema = {
+    '#deal-customer': (val) => CRMValidator.validateName(val, 'Customer contact name'),
+    '#deal-company': (val) => CRMValidator.validateCompany(val, true),
+    '#deal-value': (val) => CRMValidator.validateDealValue(val),
+    '#deal-status': (val) => CRMValidator.validateRequired(val, 'Deal status'),
+    '#deal-date': (val) => CRMValidator.validateDate(val, true, 'Deal date')
+  };
+
+  CRMValidator.setupForm(dealForm, dealSchema);
+
   // Search
   if (searchInput) {
     searchInput.addEventListener('input', (e) => {
@@ -53,6 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
       editingDealId = null;
       modalTitle.textContent = 'Add New Sales Deal';
       dealForm.reset();
+      CRMValidator.clearFormErrors(dealForm);
       document.getElementById('deal-status').value = 'Pending';
       document.getElementById('deal-date').value = new Date().toISOString().split('T')[0];
       dealModal.classList.add('open');
@@ -74,16 +86,15 @@ document.addEventListener('DOMContentLoaded', () => {
   dealForm.addEventListener('submit', (e) => {
     e.preventDefault();
 
+    if (!CRMValidator.validateForm(dealForm, dealSchema)) {
+      return;
+    }
+
     const customer = document.getElementById('deal-customer').value.trim();
     const company = document.getElementById('deal-company').value.trim();
     const dealValue = parseFloat(document.getElementById('deal-value').value);
     const date = document.getElementById('deal-date').value;
     const status = document.getElementById('deal-status').value;
-
-    if (!customer || !company || isNaN(dealValue) || dealValue < 0 || !date) {
-      showToast('Please provide valid details and positive deal amount.', 'error');
-      return;
-    }
 
     const sales = CRMData.getSales();
 
@@ -270,6 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     editingDealId = id;
     modalTitle.textContent = 'Edit Sales Deal';
+    CRMValidator.clearFormErrors(dealForm);
 
     document.getElementById('deal-customer').value = deal.customer;
     document.getElementById('deal-company').value = deal.company;

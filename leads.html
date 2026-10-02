@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="CRM Leads Pipeline - Convert prospects to customers">
-  <title>Leads - CRM</title>
+  <meta name="description" content="NEXORA Leads Pipeline - Convert prospects to customers">
+  <title>Leads - NEXORA</title>
   
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="assets/icons/logo.svg">
@@ -14,6 +14,12 @@
   
   <!-- Custom CSS -->
   <link rel="stylesheet" href="src/css/style.css">
+  <script>
+    (function() {
+      const saved = localStorage.getItem('crm_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', saved);
+    })();
+  </script>
 </head>
 <body>
 
@@ -26,9 +32,10 @@
       <div class="sidebar-brand">
         <a href="dashboard.html" class="brand-link">
           <div class="brand-logo-icon">
-            <i class="fa-solid fa-bolt"></i>
+            <img src="assets/icons/nexora-icon.png" alt="NEXORA" class="brand-logo-img logo-light">
+            <img src="assets/icons/nexora-icon-dark.png" alt="NEXORA" class="brand-logo-img logo-dark">
           </div>
-          <span class="brand-text">CRM</span>
+          <span class="brand-text">NEXORA</span>
         </a>
         <button type="button" class="sidebar-close-btn" id="sidebar-close-btn" aria-label="Close sidebar">
           <i class="fa-solid fa-xmark"></i>
@@ -86,6 +93,11 @@
             <i class="fa-solid fa-magnifying-glass"></i>
             <input type="text" placeholder="Search lead pipeline...">
           </div>
+
+          <!-- Theme Toggle (Dark / Light Mode) -->
+          <button type="button" class="header-icon-btn theme-toggle-btn" id="theme-toggle-btn" aria-label="Toggle Dark/Light Mode" title="Toggle Dark/Light Mode">
+            <i class="fa-regular fa-moon" id="theme-icon"></i>
+          </button>
 
           <!-- Notifications Dropdown -->
           <div class="notification-container">
@@ -197,7 +209,7 @@
         <h3 class="modal-title" id="lead-modal-title">Add New Lead</h3>
         <button type="button" class="modal-close-btn" id="close-lead-modal"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <form id="lead-form">
+      <form id="lead-form" novalidate>
         <div class="modal-body">
           <div class="form-group">
             <label class="form-label" for="lead-name">Lead Full Name *</label>
@@ -210,7 +222,7 @@
             </div>
             <div class="form-group">
               <label class="form-label" for="lead-contact">Phone Contact *</label>
-              <input type="tel" id="lead-contact" class="form-input" placeholder="9876500001" required>
+              <input type="tel" id="lead-contact" class="form-input" placeholder="9876500001" maxlength="10" required>
             </div>
           </div>
           <div class="form-row">

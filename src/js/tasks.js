@@ -33,6 +33,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initial Render
   renderTasks();
 
+  // Validation Schema
+  const taskSchema = {
+    '#task-desc': (val) => CRMValidator.validateTask(val),
+    '#task-date': (val) => CRMValidator.validateDate(val, true, 'Due date'),
+    '#task-priority': (val) => CRMValidator.validateRequired(val, 'Priority'),
+    '#task-status': (val) => CRMValidator.validateRequired(val, 'Status')
+  };
+
+  CRMValidator.setupForm(taskForm, taskSchema);
+
   // Search
   if (searchInput) {
     searchInput.addEventListener('input', (e) => {
@@ -63,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
       editingTaskId = null;
       modalTitle.textContent = 'Create New Task';
       taskForm.reset();
+      CRMValidator.clearFormErrors(taskForm);
       document.getElementById('task-priority').value = 'Medium';
       document.getElementById('task-status').value = 'Pending';
       document.getElementById('task-date').value = new Date().toISOString().split('T')[0];
@@ -85,15 +96,14 @@ document.addEventListener('DOMContentLoaded', () => {
   taskForm.addEventListener('submit', (e) => {
     e.preventDefault();
 
+    if (!CRMValidator.validateForm(taskForm, taskSchema)) {
+      return;
+    }
+
     const taskText = document.getElementById('task-desc').value.trim();
     const date = document.getElementById('task-date').value;
     const priority = document.getElementById('task-priority').value;
     const status = document.getElementById('task-status').value;
-
-    if (!taskText || !date) {
-      showToast('Please provide a task description and due date.', 'error');
-      return;
-    }
 
     const tasks = CRMData.getTasks();
 
@@ -325,6 +335,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     editingTaskId = id;
     modalTitle.textContent = 'Edit Task';
+    CRMValidator.clearFormErrors(taskForm);
 
     document.getElementById('task-desc').value = t.task;
     document.getElementById('task-date').value = t.date;

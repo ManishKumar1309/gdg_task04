@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="CRM - Customer Relationship Management Dashboard">
-  <title>Login - CRM</title>
+  <meta name="description" content="NEXORA - Next-Gen Customer Relationship Management Dashboard">
+  <title>Login - NEXORA</title>
   
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="assets/icons/logo.svg">
@@ -14,6 +14,9 @@
   
   <!-- Custom CSS -->
   <link rel="stylesheet" href="src/css/style.css">
+  <script>
+    document.documentElement.setAttribute('data-theme', 'light');
+  </script>
 </head>
 <body class="login-body">
 
@@ -21,9 +24,10 @@
     <div class="login-card">
       <div class="login-header">
         <div class="login-logo">
-          <i class="fa-solid fa-layer-group"></i>
+          <img src="assets/icons/nexora-icon.png" alt="NEXORA" class="logo-light">
+          <img src="assets/icons/nexora-icon-dark.png" alt="NEXORA" class="logo-dark">
         </div>
-        <h1 class="login-title">CRM</h1>
+        <h1 class="login-title">NEXORA</h1>
         <p class="login-subtitle" id="auth-subtitle">Login to continue</p>
       </div>
 
@@ -37,7 +41,7 @@
       <div class="demo-credentials-banner" id="demo-banner">
         <i class="fa-solid fa-key"></i>
         <div>
-          <div><strong>Demo Account:</strong> <code>admin@crm.com</code></div>
+          <div><strong>Demo Account:</strong> <code>admin@nexora.com</code></div>
           <div><strong>Password:</strong> <code>admin123</code></div>
         </div>
         <button type="button" class="demo-fill-btn" id="demo-fill-btn">Auto Fill</button>

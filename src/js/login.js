@@ -39,6 +39,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- Tab Switcher Logic ---
   function showLoginTab() {
     clearAlert();
+    CRMValidator.clearFormErrors(loginForm);
+    CRMValidator.clearFormErrors(registerForm);
     tabLoginBtn.classList.add('active');
     tabRegisterBtn.classList.remove('active');
     loginForm.style.display = 'block';
@@ -49,6 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function showRegisterTab() {
     clearAlert();
+    CRMValidator.clearFormErrors(loginForm);
+    CRMValidator.clearFormErrors(registerForm);
     tabRegisterBtn.classList.add('active');
     tabLoginBtn.classList.remove('active');
     registerForm.style.display = 'block';
@@ -84,10 +88,9 @@ document.addEventListener('DOMContentLoaded', () => {
   if (demoFillBtn) {
     demoFillBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      emailInput.value = 'admin@crm.com';
+      emailInput.value = 'admin@nexora.com';
       passwordInput.value = 'admin123';
       clearAlert();
-      showToast('Demo credentials autofilled!', 'info');
     });
   }
 
@@ -95,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (forgotPasswordLink) {
     forgotPasswordLink.addEventListener('click', (e) => {
       e.preventDefault();
-      showAlert('Demo mode: Use <strong>admin@crm.com</strong> and password <strong>admin123</strong> to login.', 'info');
+      showAlert('Demo mode: Use <strong>admin@nexora.com</strong> and password <strong>admin123</strong> to login.', 'info');
     });
   }
 
@@ -127,31 +130,40 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('crm_registered_users', JSON.stringify(users));
   }
 
+  // --- Validation Schemas ---
+  const loginSchema = [
+    { selector: emailInput, validate: (val) => CRMValidator.validateEmail(val, true) },
+    { selector: passwordInput, validate: (val) => CRMValidator.validateRequired(val, 'Password') }
+  ];
+
+  const registerSchema = [
+    { selector: regNameInput, validate: (val) => CRMValidator.validateName(val, 'Full Name') },
+    { selector: regEmailInput, validate: (val) => CRMValidator.validateEmail(val, true) },
+    { selector: regPasswordInput, validate: (val) => CRMValidator.validatePassword(val, 6) },
+    { selector: regConfirmPasswordInput, validate: (val) => CRMValidator.validateConfirmPassword(val, regPasswordInput.value) }
+  ];
+
+  CRMValidator.setupForm(loginForm, loginSchema);
+  CRMValidator.setupForm(registerForm, registerSchema);
+
   // --- Handle Login Submit ---
   loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
     clearAlert();
 
+    if (!CRMValidator.validateForm(loginForm, loginSchema)) {
+      return;
+    }
+
     const email = emailInput.value.trim();
     const password = passwordInput.value.trim();
-
-    if (!email) {
-      showAlert('Please enter your email address.', 'danger');
-      emailInput.focus();
-      return;
-    }
-
-    if (!password) {
-      showAlert('Please enter your password.', 'danger');
-      passwordInput.focus();
-      return;
-    }
 
     loginSubmitBtn.disabled = true;
     loginSubmitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Authenticating...';
 
     setTimeout(() => {
-      const isDefaultAdmin = (email.toLowerCase() === 'admin@crm.com' && password === 'admin123');
+      const emailLower = email.toLowerCase();
+      const isDefaultAdmin = (emailLower === 'admin@nexora.com' || emailLower === 'admin@crm.com') && password === 'admin123';
       const registeredUsers = getRegisteredUsers();
       const matchedUser = registeredUsers.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
 
@@ -163,9 +175,8 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('crm_current_user_name', userName);
 
         showAlert('Login successful! Redirecting to Dashboard...', 'success');
-        showToast(`Welcome, ${userName}!`, 'success');
 
-        CRMData.addActivity(`${userName} logged in to CRM dashboard`, 'customer');
+        CRMData.addActivity(`${userName} logged in to NEXORA dashboard`, 'customer');
 
         setTimeout(() => {
           window.location.href = 'dashboard.html';
@@ -183,39 +194,18 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     clearAlert();
 
+    if (!CRMValidator.validateForm(registerForm, registerSchema)) {
+      return;
+    }
+
     const name = regNameInput.value.trim();
     const email = regEmailInput.value.trim();
     const password = regPasswordInput.value.trim();
-    const confirmPassword = regConfirmPasswordInput.value.trim();
-
-    if (!name) {
-      showAlert('Please enter your full name.', 'danger');
-      regNameInput.focus();
-      return;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email || !emailRegex.test(email)) {
-      showAlert('Please enter a valid email address.', 'danger');
-      regEmailInput.focus();
-      return;
-    }
-
-    if (!password || password.length < 6) {
-      showAlert('Password must be at least 6 characters long.', 'danger');
-      regPasswordInput.focus();
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      showAlert('Passwords do not match. Please re-check.', 'danger');
-      regConfirmPasswordInput.focus();
-      return;
-    }
 
     // Check if email already exists
     const users = getRegisteredUsers();
-    if (email.toLowerCase() === 'admin@crm.com' || users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
+    if (email.toLowerCase() === 'admin@crm.com' || email.toLowerCase() === 'admin@nexora.com' || users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
+      CRMValidator.showError(regEmailInput, 'This email address is already registered.');
       showAlert('This email address is already registered. Please login.', 'danger');
       return;
     }
@@ -245,7 +235,6 @@ document.addEventListener('DOMContentLoaded', () => {
       passwordInput.focus();
 
       showAlert('Account registered successfully! Please login with your password.', 'success');
-      showToast('Registration successful! You can now login.', 'success');
 
       CRMData.addActivity(`New user registered: ${name} (${email})`, 'customer');
     }, 600);

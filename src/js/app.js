@@ -315,7 +315,7 @@ const CRMData = {
   addActivity(text, type = 'customer') {
     const activities = this.getActivities();
     const newActivity = {
-      id: 'act-' + Date.now(),
+      id: 'act-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
       type,
       text,
       time: 'Just now',
@@ -324,6 +324,17 @@ const CRMData = {
     activities.unshift(newActivity);
     if (activities.length > 20) activities.pop(); // keep latest 20
     localStorage.setItem(this.KEYS.ACTIVITIES, JSON.stringify(activities));
+  },
+  deleteActivity(id) {
+    const activities = this.getActivities();
+    const filtered = activities.filter((act, idx) => {
+      const actId = act.id || ('act-' + idx);
+      return actId !== id;
+    });
+    localStorage.setItem(this.KEYS.ACTIVITIES, JSON.stringify(filtered));
+  },
+  clearActivities() {
+    localStorage.setItem(this.KEYS.ACTIVITIES, JSON.stringify([]));
   },
 
   // Helper: Format Indian Rupee currency
@@ -395,8 +406,343 @@ const Auth = {
   }
 };
 
+// --- Dark / Light Theme Manager ---
+const Theme = {
+  KEY: 'crm_theme',
+
+  isLoginPage() {
+    return (document.body && document.body.classList.contains('login-body')) ||
+           !!document.querySelector('.login-card') ||
+           window.location.pathname.toLowerCase().endsWith('index.html');
+  },
+
+  init() {
+    // Keep login page permanently in light mode
+    if (this.isLoginPage()) {
+      document.documentElement.setAttribute('data-theme', 'light');
+      return;
+    }
+
+    const saved = localStorage.getItem(this.KEY);
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const currentTheme = saved || (prefersDark ? 'dark' : 'light');
+    this.apply(currentTheme, false);
+
+    const bindButtons = () => {
+      document.querySelectorAll('.theme-toggle-btn').forEach(btn => {
+        btn.onclick = (e) => {
+          e.preventDefault();
+          this.toggle();
+        };
+      });
+      this.updateIcons(document.documentElement.getAttribute('data-theme') || 'light');
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', bindButtons);
+    } else {
+      bindButtons();
+    }
+  },
+
+  apply(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem(this.KEY, theme);
+    this.updateIcons(theme);
+  },
+
+  toggle() {
+    const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+    const next = current === 'dark' ? 'light' : 'dark';
+    this.apply(next);
+  },
+
+  updateIcons(theme) {
+    document.querySelectorAll('.theme-toggle-btn i').forEach(icon => {
+      if (theme === 'dark') {
+        icon.className = 'fa-solid fa-sun';
+      } else {
+        icon.className = 'fa-regular fa-moon';
+      }
+    });
+  }
+};
+
+// Auto initialize theme
+Theme.init();
+
+// --- Universal Form Validation Engine ---
+const CRMValidator = {
+  // 1. Phone number: exactly 10 digits, numbers only
+  validatePhone(value, required = true) {
+    const trimmed = (value || '').trim();
+    if (!trimmed) {
+      return required ? 'Phone number must be exactly 10 digits.' : null;
+    }
+    if (/\D/.test(trimmed)) {
+      return 'Phone number must contain numbers only.';
+    }
+    if (trimmed.length !== 10) {
+      return 'Phone number must be exactly 10 digits.';
+    }
+    return null;
+  },
+
+  // 2. Name: letters and spaces only, min 2 characters
+  validateName(value, fieldLabel = 'Name') {
+    const trimmed = (value || '').trim();
+    if (!trimmed) {
+      return `Please enter a valid ${fieldLabel.toLowerCase()}.`;
+    }
+    if (!/^[a-zA-Z\s]+$/.test(trimmed)) {
+      return `${fieldLabel} should contain letters only.`;
+    }
+    if (trimmed.length < 2) {
+      return `${fieldLabel} must be at least 2 characters long.`;
+    }
+    return null;
+  },
+
+  // 3. Email: proper format
+  validateEmail(value, required = true) {
+    const trimmed = (value || '').trim();
+    if (!trimmed) {
+      return required ? 'Please enter a valid email address.' : null;
+    }
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(trimmed)) {
+      return 'Please enter a valid email address.';
+    }
+    return null;
+  },
+
+  // 4. Company Name: min 2 characters
+  validateCompany(value, required = true) {
+    const trimmed = (value || '').trim();
+    if (!trimmed) {
+      return required ? 'Company name is required.' : null;
+    }
+    if (trimmed.length < 2) {
+      return 'Company name must be at least 2 characters long.';
+    }
+    if (/[<>{}]/.test(trimmed)) {
+      return 'Company name contains invalid characters.';
+    }
+    return null;
+  },
+
+  // 5. Deal Value: positive number > 0
+  validateDealValue(value) {
+    const trimmed = (value || '').toString().trim();
+    if (!trimmed) {
+      return 'Deal value is required.';
+    }
+    const num = Number(trimmed);
+    if (isNaN(num) || num <= 0) {
+      return 'Deal value must be a positive number greater than 0.';
+    }
+    return null;
+  },
+
+  // 6. Date validation: valid date string
+  validateDate(value, required = true, fieldLabel = 'Date') {
+    const trimmed = (value || '').trim();
+    if (!trimmed) {
+      return required ? `${fieldLabel} is required.` : null;
+    }
+    const d = new Date(trimmed);
+    if (isNaN(d.getTime())) {
+      return `Please select a valid ${fieldLabel.toLowerCase()}.`;
+    }
+    return null;
+  },
+
+  // 7. Task description: min 3 characters
+  validateTask(value) {
+    const trimmed = (value || '').trim();
+    if (!trimmed) {
+      return 'Task description is required.';
+    }
+    if (trimmed.length < 3) {
+      return 'Task description must be at least 3 characters long.';
+    }
+    return null;
+  },
+
+  // 8. Password: min 6 characters
+  validatePassword(value, minLength = 6) {
+    if (!value) return 'Password is required.';
+    if (value.length < minLength) return `Password must be at least ${minLength} characters long.`;
+    return null;
+  },
+
+  validateConfirmPassword(confirmValue, passwordValue) {
+    if (!confirmValue) return 'Please confirm your password.';
+    if (confirmValue !== passwordValue) return 'Passwords do not match.';
+    return null;
+  },
+
+  // Generic required
+  validateRequired(value, fieldLabel = 'This field') {
+    const trimmed = (value || '').trim();
+    if (!trimmed) {
+      return `${fieldLabel} is required.`;
+    }
+    return null;
+  },
+
+  // UI Error Display Helpers
+  showError(input, message) {
+    if (!input) return;
+    input.classList.add('is-invalid');
+    input.classList.remove('is-valid');
+
+    const parent = input.closest('.form-group') || input.parentElement;
+    let errorEl = parent.querySelector('.form-error-msg');
+    if (!errorEl) {
+      errorEl = document.createElement('div');
+      errorEl.className = 'form-error-msg';
+      parent.appendChild(errorEl);
+    }
+    errorEl.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> <span>${message}</span>`;
+  },
+
+  clearError(input) {
+    if (!input) return;
+    input.classList.remove('is-invalid');
+    const parent = input.closest('.form-group') || input.parentElement;
+    if (parent) {
+      const errorEl = parent.querySelector('.form-error-msg');
+      if (errorEl) {
+        errorEl.remove();
+      }
+    }
+  },
+
+  clearFormErrors(form) {
+    if (!form) return;
+    form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+    form.querySelectorAll('.form-error-msg').forEach(el => el.remove());
+  },
+
+  _normalizeSchema(schema) {
+    if (Array.isArray(schema)) {
+      return schema.map(item => ({
+        selector: item.selector,
+        type: item.type || (typeof item.selector === 'string' && (item.selector.includes('phone') || item.selector.includes('contact')) ? 'phone' : 'text'),
+        validate: item.validate || item.fn
+      }));
+    }
+    if (schema && typeof schema === 'object') {
+      return Object.keys(schema).map(key => {
+        const val = schema[key];
+        if (typeof val === 'function') {
+          return {
+            selector: key,
+            type: (key.includes('phone') || key.includes('contact')) ? 'phone' : 'text',
+            validate: val
+          };
+        }
+        return {
+          selector: key,
+          type: val.type || ((key.includes('phone') || key.includes('contact')) ? 'phone' : 'text'),
+          validate: val.validate || val.fn
+        };
+      });
+    }
+    return [];
+  },
+
+  // Bind real-time input and blur validation
+  setupForm(form, schema) {
+    if (!form) return;
+    const normalized = this._normalizeSchema(schema);
+
+    normalized.forEach(fieldDef => {
+      const input = typeof fieldDef.selector === 'string' ? form.querySelector(fieldDef.selector) : fieldDef.selector;
+      if (!input) return;
+
+      // Phone auto-sanitizer: numbers only, max 10 digits
+      if (fieldDef.type === 'phone') {
+        input.setAttribute('maxlength', '10');
+        input.setAttribute('inputmode', 'numeric');
+        input.addEventListener('input', () => {
+          input.value = input.value.replace(/\D/g, '').slice(0, 10);
+          if (input.classList.contains('is-invalid')) {
+            const err = fieldDef.validate(input.value);
+            if (!err) CRMValidator.clearError(input);
+            else CRMValidator.showError(input, err);
+          }
+        });
+      } else {
+        input.addEventListener('input', () => {
+          if (input.classList.contains('is-invalid')) {
+            const err = fieldDef.validate(input.value);
+            if (!err) CRMValidator.clearError(input);
+            else CRMValidator.showError(input, err);
+          }
+        });
+      }
+
+      input.addEventListener('blur', () => {
+        const err = fieldDef.validate(input.value);
+        if (err) {
+          CRMValidator.showError(input, err);
+        } else {
+          CRMValidator.clearError(input);
+        }
+      });
+
+      if (input.tagName === 'SELECT') {
+        input.addEventListener('change', () => {
+          const err = fieldDef.validate(input.value);
+          if (err) CRMValidator.showError(input, err);
+          else CRMValidator.clearError(input);
+        });
+      }
+    });
+  },
+
+  // Validate all fields on submit
+  validateForm(form, schema) {
+    if (!form) return true;
+    const normalized = this._normalizeSchema(schema);
+    let isValid = true;
+    let firstInvalid = null;
+
+    normalized.forEach(fieldDef => {
+      const input = typeof fieldDef.selector === 'string' ? form.querySelector(fieldDef.selector) : fieldDef.selector;
+      if (!input) return;
+
+      const err = fieldDef.validate(input.value);
+      if (err) {
+        isValid = false;
+        CRMValidator.showError(input, err);
+        if (!firstInvalid) {
+          firstInvalid = input;
+        }
+      } else {
+        CRMValidator.clearError(input);
+      }
+    });
+
+    if (!isValid && firstInvalid) {
+      firstInvalid.focus();
+    }
+
+    return isValid;
+  }
+};
+
 // --- Toast Notifications ---
 function showToast(message, type = 'success') {
+  // Suppress side popups on login page only
+  if ((document.body && document.body.classList.contains('login-body')) ||
+      document.querySelector('.login-card') ||
+      window.location.pathname.toLowerCase().endsWith('index.html')) {
+    return;
+  }
+
   let container = document.getElementById('toast-container');
   if (!container) {
     container = document.createElement('div');

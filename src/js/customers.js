@@ -48,6 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
       editingCustomerId = null;
       modalTitle.textContent = 'Add New Customer';
       customerForm.reset();
+      CRMValidator.clearFormErrors(customerForm);
       document.getElementById('cust-status').value = 'Active';
       customerModal.classList.add('open');
     });
@@ -68,28 +69,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Validation Schema for Customers
+  const customerSchema = [
+    { selector: '#cust-name', validate: (val) => CRMValidator.validateName(val, 'Customer name') },
+    { selector: '#cust-email', validate: (val) => CRMValidator.validateEmail(val, true) },
+    { selector: '#cust-phone', type: 'phone', validate: (val) => CRMValidator.validatePhone(val, true) },
+    { selector: '#cust-company', validate: (val) => CRMValidator.validateCompany(val, true) },
+    { selector: '#cust-status', validate: (val) => CRMValidator.validateRequired(val, 'Status') }
+  ];
+
+  CRMValidator.setupForm(customerForm, customerSchema);
+
   // Handle Form Submit (Add or Edit)
   customerForm.addEventListener('submit', (e) => {
     e.preventDefault();
+
+    if (!CRMValidator.validateForm(customerForm, customerSchema)) {
+      showToast('Please correct the highlighted errors.', 'error');
+      return;
+    }
 
     const name = document.getElementById('cust-name').value.trim();
     const email = document.getElementById('cust-email').value.trim();
     const phone = document.getElementById('cust-phone').value.trim();
     const company = document.getElementById('cust-company').value.trim();
     const status = document.getElementById('cust-status').value;
-
-    // Field Validation
-    if (!name || !email || !company) {
-      showToast('Please fill in all required fields.', 'error');
-      return;
-    }
-
-    // Basic email check
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      showToast('Please enter a valid email address.', 'error');
-      return;
-    }
 
     const customers = CRMData.getCustomers();
 
@@ -266,6 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     editingCustomerId = id;
     modalTitle.textContent = 'Edit Customer';
+    CRMValidator.clearFormErrors(customerForm);
 
     document.getElementById('cust-name').value = cust.name;
     document.getElementById('cust-email').value = cust.email;

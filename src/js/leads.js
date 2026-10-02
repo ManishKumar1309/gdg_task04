@@ -31,6 +31,20 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initial Render
   renderLeads();
 
+  // Form Validation Schema
+  const leadSchema = {
+    '#lead-name': (val) => CRMValidator.validateName(val, 'Lead full name'),
+    '#lead-company': (val) => CRMValidator.validateCompany(val, true),
+    '#lead-contact': {
+      type: 'phone',
+      fn: (val) => CRMValidator.validatePhone(val, true)
+    },
+    '#lead-status': (val) => CRMValidator.validateRequired(val, 'Lead status'),
+    '#lead-date': (val) => CRMValidator.validateDate(val, false, 'Follow-up date')
+  };
+
+  CRMValidator.setupForm(leadForm, leadSchema);
+
   // Search
   if (searchInput) {
     searchInput.addEventListener('input', (e) => {
@@ -53,6 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
       editingLeadId = null;
       modalTitle.textContent = 'Add New Lead';
       leadForm.reset();
+      CRMValidator.clearFormErrors(leadForm);
       document.getElementById('lead-status').value = 'New';
       // Default date to today + 3 days
       const d = new Date();
@@ -77,16 +92,15 @@ document.addEventListener('DOMContentLoaded', () => {
   leadForm.addEventListener('submit', (e) => {
     e.preventDefault();
 
+    if (!CRMValidator.validateForm(leadForm, leadSchema)) {
+      return;
+    }
+
     const name = document.getElementById('lead-name').value.trim();
     const company = document.getElementById('lead-company').value.trim();
     const contact = document.getElementById('lead-contact').value.trim();
     const status = document.getElementById('lead-status').value;
     const followUpDate = document.getElementById('lead-date').value;
-
-    if (!name || !company || !contact) {
-      showToast('Please fill in all required fields.', 'error');
-      return;
-    }
 
     const leads = CRMData.getLeads();
 
@@ -281,6 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     editingLeadId = id;
     modalTitle.textContent = 'Edit Lead';
+    CRMValidator.clearFormErrors(leadForm);
 
     document.getElementById('lead-name').value = lead.name;
     document.getElementById('lead-company').value = lead.company;
